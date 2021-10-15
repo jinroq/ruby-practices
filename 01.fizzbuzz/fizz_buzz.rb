@@ -1,14 +1,17 @@
+# frozen_string_literal: true
+
+# FizzBuzz クラス
 class FizzBuzz
   def run
     20.times do |n|
-      if 0 == (n + 1) % 15
-        puts "FizzBuzz"
-      elsif 0 == (n + 1) % 5
-        puts "Buzz"
-      elsif 0 == (n + 1) % 3
-        puts "Fizz"
+      if ((n + 1) % 15).zero?
+        puts 'FizzBuzz'
+      elsif ((n + 1) % 5).zero?
+        puts 'Buzz'
+      elsif ((n + 1) % 3).zero?
+        puts 'Fizz'
       else
-        puts (n + 1)
+        puts n + 1
       end
     end
   end
