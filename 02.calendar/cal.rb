@@ -14,8 +14,6 @@ class Cal
       @current = Date.new(params["y"].to_i, params['m'].to_i, 1)
     elsif params['m']
       @current = Date.new(today.year, params['m'].to_i, 1)
-    elsif params['y']
-      @current = today
     else
       @current = today
     end
