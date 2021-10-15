@@ -120,6 +120,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# fro emacs
+# for emacs
 *~
 \#*\#
