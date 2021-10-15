@@ -7,16 +7,25 @@ class Cal
   SUNDAY_ORIGIN_WEEKS = ['日','月','火','水','木','金','土']
 
   def initialize
-    @today = Date.today
+    params = OptionParser.new.getopts("m:y:")
+
+    today = Date.today
+    if params['m'] && params['y']
+      @current = Date.new(params["y"].to_i, params['m'].to_i, 1)
+    elsif params['m']
+      @current = Date.new(today.year, params['m'].to_i, 1)
+    elsif params['y']
+      @current = today
+    else
+      @current = today
+    end
   end
 
   def run
     puts_header
 
-    current_month_first_day = Date.new(@today.year, @today.month, 1)
-#    puts current_month_first_day
-    current_month_last_day = Date.new(@today.year, @today.month, -1)
-#    puts current_month_last_day
+    current_month_first_day = Date.new(@current.year, @current.month, 1)
+    current_month_last_day = Date.new(@current.year, @current.month, -1)
 
     last_day = current_month_last_day.day
     weeks = []
@@ -58,7 +67,6 @@ class Cal
           next
         end
 
-        weeks.push('  ')
         # ここまでくれば土曜日のはず
         weeks.push(current_month_first_day.strftime('%e'))
         puts weeks.join(' ')
@@ -83,10 +91,11 @@ class Cal
   private
 
   def puts_header
-    puts "#{' '*6}#{@today.month}月 #{@today.year}"
+    puts "#{' '*6}#{@current.month}月 #{@current.year}"
     weeks_header = SUNDAY_ORIGIN_WEEKS.join(' ')
     puts "#{weeks_header}"
   end
+
 end
 
 Cal.new.run
