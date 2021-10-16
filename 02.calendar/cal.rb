@@ -32,7 +32,6 @@ class Cal
     weeks = []
     last_day.times do |day|
       if (day + 1) == 1
-        weeks.push('  ')
         if current_month_first_day.sunday?
           weeks.push(current_month_first_day.strftime('%e'))
           next
@@ -40,6 +39,12 @@ class Cal
 
         weeks.push('  ')
         if current_month_first_day.monday?
+          weeks.push(current_month_first_day.strftime('%e'))
+          next
+        end
+
+        weeks.push('  ')
+        if current_month_first_day.tuesday?
           weeks.push(current_month_first_day.strftime('%e'))
           next
         end
@@ -63,11 +68,6 @@ class Cal
         end
 
         weeks.push('  ')
-        if current_month_first_day.friday?
-          weeks.push(current_month_first_day.strftime('%e'))
-          next
-        end
-
         # ここまでくれば土曜日のはず
         weeks.push(current_month_first_day.strftime('%e'))
         puts weeks.join(' ')
@@ -92,7 +92,7 @@ class Cal
   def puts_header
     puts "#{' ' * 6}#{@current.month}月 #{@current.year}"
     weeks_header = SUNDAY_ORIGIN_WEEKS.join(' ')
-    puts "#{weeks_header}"
+    puts weeks_header.to_s
   end
 end
 
