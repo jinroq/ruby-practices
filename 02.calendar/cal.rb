@@ -31,43 +31,41 @@ class Cal
     weeks = []
     last_day.times do |day|
       if (day + 1) == 1
+        current_month_first_day.wday.times do |w|
+          weeks.push('  ')
+        end
+      end
+      if (day + 1) == 1
         if current_month_first_day.sunday?
           weeks.push(current_month_first_day.strftime('%e'))
           next
         end
 
-        #weeks.push('  ' * current_month_first_day.wday)
-        weeks.push('  ')
         if current_month_first_day.monday?
           weeks.push(current_month_first_day.strftime('%e'))
           next
         end
 
-        weeks.push('  ')
         if current_month_first_day.tuesday?
           weeks.push(current_month_first_day.strftime('%e'))
           next
         end
 
-        weeks.push('  ')
         if current_month_first_day.wednesday?
           weeks.push(current_month_first_day.strftime('%e'))
           next
         end
 
-        weeks.push('  ')
         if current_month_first_day.thursday?
           weeks.push(current_month_first_day.strftime('%e'))
           next
         end
 
-        weeks.push('  ')
         if current_month_first_day.friday?
           weeks.push(current_month_first_day.strftime('%e'))
           next
         end
 
-        weeks.push('  ')
         # ここまでくれば土曜日のはず
         weeks.push(current_month_first_day.strftime('%e'))
         puts weeks.join(' ')
