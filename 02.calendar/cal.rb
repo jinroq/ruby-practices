@@ -35,48 +35,11 @@ class Cal
           weeks.push('  ')
         end
       end
-      if (day + 1) == 1
-        if current_month_first_day.sunday?
-          weeks.push(current_month_first_day.strftime('%e'))
-          next
-        end
-
-        if current_month_first_day.monday?
-          weeks.push(current_month_first_day.strftime('%e'))
-          next
-        end
-
-        if current_month_first_day.tuesday?
-          weeks.push(current_month_first_day.strftime('%e'))
-          next
-        end
-
-        if current_month_first_day.wednesday?
-          weeks.push(current_month_first_day.strftime('%e'))
-          next
-        end
-
-        if current_month_first_day.thursday?
-          weeks.push(current_month_first_day.strftime('%e'))
-          next
-        end
-
-        if current_month_first_day.friday?
-          weeks.push(current_month_first_day.strftime('%e'))
-          next
-        end
-
-        # ここまでくれば土曜日のはず
-        weeks.push(current_month_first_day.strftime('%e'))
+      current_day = current_month_first_day + day
+      weeks.push(current_day.strftime('%e'))
+      if current_day.saturday? || (day + 1) == last_day
         puts weeks.join(' ')
         weeks = []
-      else
-        current_day = current_month_first_day + day
-        weeks.push(current_day.strftime('%e'))
-        if current_day.saturday? || (day + 1) == last_day
-          puts weeks.join(' ')
-          weeks = []
-        end
       end
     end
   end
