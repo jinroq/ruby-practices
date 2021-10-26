@@ -41,40 +41,32 @@ class Bowling
   end
 
   def create_frames(shots)
-    frames = []
-    shots.each_slice(2) do |s|
-      frames << s
-    end
-    if frames.size > MAX_FRAME
-      if frames.size == (MAX_FRAME + 1)
-        last = frames.delete_at(MAX_FRAME)
-        frames[MAX_FRAME - 1] << last[0]
-      elsif frames.size == (MAX_FRAME + 2)
-        last = frames.delete_at(MAX_FRAME + 1)
-        second = frames.delete_at(MAX_FRAME)
-        frames[MAX_FRAME - 1][1] = second[0]
-        frames[MAX_FRAME - 1] << last[0]
-      else
-        # ここに来ることはないので何もしない。
-      end
+    frames = shots.each_slice(2).to_a
+    if frames.size == (MAX_FRAME + 1)
+      last = frames.delete_at(MAX_FRAME)
+      frames[MAX_FRAME - 1] << last[0]
+    elsif frames.size == (MAX_FRAME + 2)
+      last = frames.delete_at(MAX_FRAME + 1)
+      second = frames.delete_at(MAX_FRAME)
+      frames[MAX_FRAME - 1][1] = second[0]
+      frames[MAX_FRAME - 1] << last[0]
+      # else
+      # else 書きたい派だけど rubocop に文句言われるのでコメントアウト。
     end
 
     frames
   end
 
   def calculate_point(frames)
-    point = 0
-    MAX_FRAME.times do |i|
-      if strike?(frames[i])
-        point += get_strike(frames, i)
-      elsif spare?(frames[i])
-        point += get_spare(frames, i)
+    frames.each_with_index.sum do |frame, i|
+      if strike?(frame)
+        get_strike(frames, i)
+      elsif spare?(frame)
+        get_spare(frames, i)
       else
-        point += frames[i].sum
+        frame.sum
       end
     end
-
-    point
   end
 
   def strike?(frame)
@@ -87,28 +79,31 @@ class Bowling
 
   def get_strike(frames, index)
     point = 0
-    if index <= 7
-      if strike?(frames[index + 1])
-        point += 10 + 10 + frames[index + 2][0]
-      else
-        point += 10 + frames[index + 1].sum
+    next_frame = frames[index + 1]
+    point +=
+      if index <= 7
+        if strike?(next_frame)
+          10 + 10 + frames[index + 2][0]
+        else
+          10 + next_frame.sum
+        end
+      elsif index == 8
+        10 + next_frame[0] + next_frame[1]
+      else # ここに来るのは 10 フレーム目のみ
+        frames[index].sum
       end
-    elsif index == 8
-      point += 10 + frames[index + 1][0] + frames[index + 1][1]
-    else # ここに来るのは 10 フレーム目のみ
-      point += frames[index].sum
-    end
 
     point
   end
 
   def get_spare(frames, index)
     point = 0
-    if index <= 8
-      point += 10 + frames[index + 1][0]
-    else # ここにくるのは 10 フレーム目のみ
-      point += frames[index].sum
-    end
+    point +=
+      if index <= 8
+        10 + frames[index + 1][0]
+      else # ここにくるのは 10 フレーム目のみ
+        frames[index].sum
+      end
 
     point
   end
