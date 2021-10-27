@@ -8,13 +8,13 @@ class Ls
   end
 
   def run
-    list = create_list
-    puts_list(list)
+    lines = create_lines
+    puts_list(lines)
   end
 
   private
 
-  def create_list(columns = 3)
+  def create_lines(columns = 3)
     files = @files
     size = files.size
 
@@ -23,15 +23,15 @@ class Ls
       lines[i] = []
     end
 
-    size.times do |i|
-      lines[i % columns].push(files[i])
+    files.each_with_index do |file, i|
+      lines[i % columns].push(file)
     end
 
     lines
   end
 
-  def puts_list(list)
-    list.each do |l|
+  def puts_list(lines)
+    lines.each do |l|
       puts l.join('	')
     end
   end
