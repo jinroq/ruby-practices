@@ -1,10 +1,18 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'optparse'
+
 # Ls クラス
 class Ls
   def initialize
-    @files = Dir.glob('*')
+    opt = OptionParser.new
+    params = {}
+
+    opt.on('-a') { |v| params[:a] = v }
+    opt.parse!(ARGV)
+
+    @files = params.empty? ? Dir.glob('*') : Dir.glob('*', File::FNM_DOTMATCH)
   end
 
   def run
@@ -18,13 +26,11 @@ class Ls
     files = @files
     size = files.size
 
-    lines = Array.new(size / columns, 0)
-    lines.each_with_index do |_line, i|
-      lines[i] = []
-    end
+    lines = Array.new(size / columns) { [] }
+    max_line = lines.length
 
     files.each_with_index do |file, i|
-      lines[i % columns].push(file)
+      lines[i % max_line].push(file)
     end
 
     lines
