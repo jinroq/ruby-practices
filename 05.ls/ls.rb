@@ -10,9 +10,11 @@ class Ls
     params = {}
 
     opt.on('-a') { |v| params[:a] = v }
+    opt.on('-r') { |v| params[:r] = v }
     opt.parse!(ARGV)
 
-    @files = params.empty? ? Dir.glob('*') : Dir.glob('*', File::FNM_DOTMATCH)
+    @files = params[:a] ? Dir.glob('*', File::FNM_DOTMATCH) : Dir.glob('*')
+    @files = @files.reverse if params[:r]
   end
 
   def run
