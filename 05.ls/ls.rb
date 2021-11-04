@@ -7,18 +7,14 @@ require 'optparse'
 class Ls
   def initialize
     opt = OptionParser.new
-    @params = {}
+    params = {}
 
-    opt.on('-a') { |v| @params[:a] = v }
-    opt.on('-r') { |v| @params[:r] = v }
+    opt.on('-a') { |v| params[:a] = v }
+    opt.on('-r') { |v| params[:r] = v }
     opt.parse!(ARGV)
 
-    @files =
-      if @params.empty? || @params[:r]
-        Dir.glob('*')
-      else
-        Dir.glob('*', File::FNM_DOTMATCH)
-      end
+    @files = params[:a] ? Dir.glob('*', File::FNM_DOTMATCH) : Dir.glob('*')
+    @files = @files.reverse if params[:r]
   end
 
   def run
@@ -35,7 +31,6 @@ class Ls
     lines = Array.new(size / columns) { [] }
     max_line = lines.length
 
-    files = files.reverse if @params[:r]
     files.each_with_index do |file, i|
       lines[i % max_line].push(file)
     end
