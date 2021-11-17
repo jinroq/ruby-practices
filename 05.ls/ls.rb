@@ -49,7 +49,6 @@ class Ls
   MASK_OTHER_PERMISSION = 0o000007
 
   # パーミッションのビットフラグ
-  OCT_ALL_PERMISSION        = 0o7
   OCT_READABLE_PERMISSION   = 0o4
   OCT_WRITABLE_PERMISSION   = 0o2
   OCT_EXECUTABLE_PERMISSION = 0o1
@@ -60,6 +59,9 @@ class Ls
   CHR_WRITABLE_PERMISSION   = 'w'
   CHR_EXECUTABLE_PERMISSION = 'x'
   CHR_NON_PERMISSION        = '-'
+
+  # 1 KiB
+  ONE_KIBIBYTE = 1024
 
   def initialize
     opt = OptionParser.new
@@ -84,17 +86,20 @@ class Ls
 
   def create_lines(columns = 3)
     files = @files
-    size = files.size
+    length = files.length
+    filesize = 0
 
-    lines = @list_flag ? [] : Array.new(size / columns) { [] }
+    lines = @list_flag ? [] : Array.new(length / columns) { [] }
     if @list_flag
       files.each do |file|
-        filestat = File.lstat(File.absolute_path(file))
-        filemode = filestat.mode
-        filetype = get_chr_filetype(filemode)
-        permission = get_permission(filemode)
-        time = filestat.mtime
+        filestat   = File.lstat(File.absolute_path(file))
+        filemode   = filestat.mode
+        filetype   = _chr_filetype(filemode)
+        permission = _permission(filemode)
+        time       = filestat.mtime
+        size       = FileTest.size(File.absolute_path(file))
 
+        filesize += size
         lines.push(filetype +
                    permission +
                    ' ' +
@@ -104,18 +109,14 @@ class Ls
                    ' ' +
                    Etc.getgrgid(filestat.uid).name +
                    ' ' +
-                   FileTest.size(File.absolute_path(file)).to_s +
+                   size.to_s +
                    ' ' +
-                   time.year.to_s + '年' +
-                   ' ' +
-                   time.month.to_s.rjust(2) + '月' +
-                   ' ' +
-                   time.day.to_s.rjust(2) +
-                   ' ' +
-                   time.hour.to_s + ':' + time.min.to_s.rjust(2, '0') + 
+                   time.strftime("%Y年 %_m月 %_d %_H:%S") +
                    ' ' +
                    file)
       end
+
+      lines.unshift("合計 #{filesize/ONE_KIBIBYTE}")
     else
       max_line = lines.length
 
@@ -127,7 +128,7 @@ class Ls
     lines
   end
 
-  def get_chr_filetype(filemode)
+  def _chr_filetype(filemode)
     filetype = filemode & MASK_FILETYPE
 
     return CHR_FILETYPE_FIFO              if filetype == OCT_FILETYPE_FIFO
@@ -140,23 +141,23 @@ class Ls
     CHR_FILETYPE_SOCKET                 # if filetype == OCT_FILETYPE_SOCKET
   end
 
-  def get_permission(filemode)
+  def _permission(filemode)
     otherwise = filemode & MASK_OTHERWISE
 
     owner_permission = filemode & MASK_OWNER_PERMISSION
-    permission = get_str_permission(owner_permission >> 6,
+    permission = _str_permission(owner_permission >> 6,
                                     { suid: otherwise })
     group_permission = filemode & MASK_GROUP_PERMISSION
-    permission += get_str_permission(group_permission >> 3,
+    permission += _str_permission(group_permission >> 3,
                                      { sgid: otherwise })
     other_permission = filemode & MASK_OTHER_PERMISSION
-    permission += get_str_permission(other_permission,
+    permission += _str_permission(other_permission,
                                      { stickybit: otherwise })
 
     permission
   end
 
-  def get_str_permission(permission, otherwise = {})
+  def _str_permission(permission, otherwise = {})
     readable   = CHR_NON_PERMISSION
     writable   = CHR_NON_PERMISSION
 
@@ -164,15 +165,15 @@ class Ls
     writable = CHR_WRITABLE_PERMISSION if permission & OCT_WRITABLE_PERMISSION == OCT_WRITABLE_PERMISSION
     executable =
       if permission & OCT_EXECUTABLE_PERMISSION == OCT_EXECUTABLE_PERMISSION
-        get_executable(otherwise)
+        _executable(otherwise)
       else
-        get_non_executable(otherwise)
+        _non_executable(otherwise)
       end
 
     readable + writable + executable
   end
 
-  def get_executable(otherwise)
+  def _executable(otherwise)
     return CHR_SUID      if otherwise[:suid] == OCT_SUID
     return CHR_SGID      if otherwise[:sgid] == OCT_SGID
     return CHR_STICKYBIT if otherwise[:stickybit] == OCT_STICKYBIT
@@ -180,7 +181,7 @@ class Ls
     CHR_EXECUTABLE_PERMISSION
   end
 
-  def get_non_executable(otherwise)
+  def _non_executable(otherwise)
     return CHR_SUID_L      if otherwise[:suid] == OCT_SUID
     return CHR_SGID_L      if otherwise[:sgid] == OCT_SGID
     return CHR_STICKYBIT_L if otherwise[:stickybit] == OCT_STICKYBIT
